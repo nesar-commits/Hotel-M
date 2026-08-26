@@ -2,6 +2,10 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session, joinedload
 
 from app import models, schemas
+<<<<<<< HEAD
+=======
+from app.geo import haversine_km
+>>>>>>> bed6d3f (second commit)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -28,6 +32,22 @@ def get_restaurant(db: Session, restaurant_id: int):
     )
 
 
+<<<<<<< HEAD
+=======
+def list_restaurants_near(db: Session, lat: float, lng: float, limit: int = 20):
+    restaurants = db.query(models.Restaurant).all()
+    with_distance = [
+        (r, haversine_km(lat, lng, r.latitude, r.longitude)) for r in restaurants
+    ]
+    with_distance.sort(key=lambda pair: pair[1])
+    results = []
+    for restaurant, distance in with_distance[:limit]:
+        data = schemas.RestaurantOut.model_validate(restaurant).model_dump()
+        results.append(schemas.RestaurantWithDistanceOut(**data, distance_km=round(distance, 1)))
+    return results
+
+
+>>>>>>> bed6d3f (second commit)
 def create_restaurant(db: Session, restaurant: schemas.RestaurantCreate):
     db_restaurant = models.Restaurant(**restaurant.model_dump())
     db.add(db_restaurant)

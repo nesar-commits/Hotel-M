@@ -53,6 +53,11 @@ class RestaurantBase(BaseModel):
     cost_for_two: int = 0
     image_url: str = ""
     is_open: bool = True
+<<<<<<< HEAD
+=======
+    latitude: float = 0.0
+    longitude: float = 0.0
+>>>>>>> bed6d3f (second commit)
 
 
 class RestaurantCreate(RestaurantBase):
@@ -70,6 +75,13 @@ class RestaurantDetailOut(RestaurantOut):
     menu_items: list[MenuItemOut] = []
 
 
+<<<<<<< HEAD
+=======
+class RestaurantWithDistanceOut(RestaurantOut):
+    distance_km: float
+
+
+>>>>>>> bed6d3f (second commit)
 # ---------- User ----------
 class UserCreate(BaseModel):
     name: str

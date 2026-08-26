@@ -28,6 +28,10 @@ export default function RestaurantCard({ restaurant }) {
         <p className="mt-1 truncate text-sm text-gray-500">{restaurant.cuisine_type}</p>
         <p className="mt-1 text-sm text-gray-500">
           {restaurant.city} · ₹{restaurant.cost_for_two} for two
+<<<<<<< HEAD
+=======
+          {restaurant.distance_km != null && ` · ${restaurant.distance_km} km away`}
+>>>>>>> bed6d3f (second commit)
         </p>
       </div>
     </Link>

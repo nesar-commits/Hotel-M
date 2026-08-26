@@ -1,5 +1,9 @@
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext.jsx";
+<<<<<<< HEAD
+=======
+import Logo from "./Logo.jsx";
+>>>>>>> bed6d3f (second commit)
 
 export default function Navbar({ onCartClick }) {
   const { itemCount } = useCart();
@@ -7,8 +11,13 @@ export default function Navbar({ onCartClick }) {
   return (
     <header className="sticky top-0 z-30 bg-white shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+<<<<<<< HEAD
         <Link to="/" className="flex items-center gap-2">
           <span className="text-2xl font-extrabold tracking-tight text-zomato">TastyHub</span>
+=======
+        <Link to="/">
+          <Logo />
+>>>>>>> bed6d3f (second commit)
         </Link>
         <Link
           to="/cities"

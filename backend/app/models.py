@@ -23,6 +23,11 @@ class Restaurant(Base):
     cuisine_type: Mapped[str] = mapped_column(String(150), default="")
     city: Mapped[str] = mapped_column(String(100), default="")
     address: Mapped[str] = mapped_column(String(250), default="")
+<<<<<<< HEAD
+=======
+    latitude: Mapped[float] = mapped_column(Float, default=0.0)
+    longitude: Mapped[float] = mapped_column(Float, default=0.0)
+>>>>>>> bed6d3f (second commit)
     rating: Mapped[float] = mapped_column(Float, default=0.0)
     cost_for_two: Mapped[int] = mapped_column(Integer, default=0)
     image_url: Mapped[str] = mapped_column(String(500), default="")

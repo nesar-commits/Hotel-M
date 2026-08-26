@@ -19,6 +19,16 @@ def create_restaurant(restaurant: schemas.RestaurantCreate, db: Session = Depend
     return crud.create_restaurant(db, restaurant)
 
 
+<<<<<<< HEAD
+=======
+@router.get("/nearby", response_model=list[schemas.RestaurantWithDistanceOut])
+def list_nearby_restaurants(
+    lat: float, lng: float, limit: int = 20, db: Session = Depends(get_db)
+):
+    return crud.list_restaurants_near(db, lat=lat, lng=lng, limit=limit)
+
+
+>>>>>>> bed6d3f (second commit)
 @router.get("/{restaurant_id}", response_model=schemas.RestaurantDetailOut)
 def get_restaurant(restaurant_id: int, db: Session = Depends(get_db)):
     restaurant = crud.get_restaurant(db, restaurant_id)
