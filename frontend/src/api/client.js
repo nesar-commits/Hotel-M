@@ -8,12 +8,9 @@ export const api = axios.create({
 
 export const getRestaurants = (params) => api.get("/restaurants", { params }).then((r) => r.data);
 
-<<<<<<< HEAD
-=======
 export const getNearbyRestaurants = (lat, lng) =>
   api.get("/restaurants/nearby", { params: { lat, lng } }).then((r) => r.data);
 
->>>>>>> bed6d3f (second commit)
 export const getRestaurant = (id) => api.get(`/restaurants/${id}`).then((r) => r.data);
 
 export const getMenuItems = (restaurantId, params) =>

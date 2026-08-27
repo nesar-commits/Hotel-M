@@ -18,11 +18,8 @@ RESTAURANTS = [
         "cuisine_type": "North Indian, Mughlai",
         "city": "Mumbai",
         "address": "12 MG Road, Mumbai",
-<<<<<<< HEAD
-=======
         "latitude": 18.9308,
         "longitude": 72.8347,
->>>>>>> bed6d3f (second commit)
         "rating": 4.4,
         "cost_for_two": 700,
         "image_url": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800",
@@ -44,11 +41,8 @@ RESTAURANTS = [
         "cuisine_type": "Italian, Pizza",
         "city": "Mumbai",
         "address": "45 Linking Road, Bandra, Mumbai",
-<<<<<<< HEAD
-=======
         "latitude": 19.0596,
         "longitude": 72.8295,
->>>>>>> bed6d3f (second commit)
         "rating": 4.6,
         "cost_for_two": 900,
         "image_url": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800",
@@ -71,11 +65,8 @@ RESTAURANTS = [
         "cuisine_type": "Chinese, Asian",
         "city": "Bengaluru",
         "address": "8 Indiranagar 100ft Road, Bengaluru",
-<<<<<<< HEAD
-=======
         "latitude": 12.9716,
         "longitude": 77.6412,
->>>>>>> bed6d3f (second commit)
         "rating": 4.2,
         "cost_for_two": 600,
         "image_url": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800",
@@ -117,11 +108,8 @@ def run():
                 cuisine_type=r["cuisine_type"],
                 city=r["city"],
                 address=r["address"],
-<<<<<<< HEAD
-=======
                 latitude=r["latitude"],
                 longitude=r["longitude"],
->>>>>>> bed6d3f (second commit)
                 rating=r["rating"],
                 cost_for_two=r["cost_for_two"],
                 image_url=r["image_url"],
