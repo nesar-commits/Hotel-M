@@ -1,26 +1,35 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { placeOrder } from "../api/client.js";
+import { useAuth } from "../context/AuthContext.jsx";
 import { useCart } from "../context/CartContext.jsx";
 
 export default function CartDrawer({ open, onClose }) {
   const { items, total, addItem, decrementItem, clearCart, restaurantId } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [placing, setPlacing] = useState(false);
-  const [placed, setPlaced] = useState(false);
+  const [placed, setPlaced] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleCheckout = async () => {
     if (!restaurantId || items.length === 0) return;
+    if (!user) {
+      onClose();
+      navigate("/login");
+      return;
+    }
+    setError(null);
     setPlacing(true);
     try {
-      await placeOrder({
-        user_id: 1,
+      const order = await placeOrder({
         restaurant_id: restaurantId,
         items: items.map((i) => ({ menu_item_id: i.id, quantity: i.quantity })),
       });
-      setPlaced(true);
+      setPlaced(order);
       clearCart();
     } catch (err) {
-      console.error(err);
-      alert("Could not place order. Is the backend running?");
+      setError(err.response?.data?.detail || "Could not place order. Is the backend running?");
     } finally {
       setPlacing(false);
     }
@@ -49,7 +58,16 @@ export default function CartDrawer({ open, onClose }) {
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {placed && (
             <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm font-medium text-green-700">
-              Order placed! It'll be at your table soon.
+              Order placed!{" "}
+              <Link to={`/orders/${placed.id}`} onClick={onClose} className="underline">
+                Track it here
+              </Link>
+              .
+            </div>
+          )}
+          {error && (
+            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-600">
+              {error}
             </div>
           )}
           {items.length === 0 ? (
@@ -84,7 +102,7 @@ export default function CartDrawer({ open, onClose }) {
               disabled={placing}
               className="w-full rounded-xl bg-zomato py-3 text-sm font-bold text-white shadow hover:bg-zomato-dark disabled:opacity-60"
             >
-              {placing ? "Placing order..." : "Place Order"}
+              {placing ? "Placing order..." : user ? "Place Order" : "Log In to Order"}
             </button>
           </div>
         )}

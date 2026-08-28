@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
-from app.routers import locations, menu, orders, recommendations, restaurants, users
+from app.routers import menu, orders, recommendations, restaurants, users
 
 Base.metadata.create_all(bind=engine)
 
@@ -21,7 +21,6 @@ app.include_router(menu.router)
 app.include_router(orders.router)
 app.include_router(recommendations.router)
 app.include_router(users.router)
-app.include_router(locations.router)
 
 
 @app.get("/")

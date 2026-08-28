@@ -83,11 +83,23 @@ class UserCreate(BaseModel):
     password: str
 
 
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
 class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     name: str
     email: EmailStr
+    is_staff: bool = False
+
+
+class TokenOut(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserOut
 
 
 # ---------- Order ----------
@@ -97,15 +109,19 @@ class OrderItemCreate(BaseModel):
 
 
 class OrderCreate(BaseModel):
-    user_id: int
     restaurant_id: int
     items: list[OrderItemCreate]
+
+
+class OrderStatusUpdate(BaseModel):
+    status: str
 
 
 class OrderItemOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     menu_item_id: int
+    menu_item_name: str = ""
     quantity: int
     price: float
 
@@ -115,6 +131,7 @@ class OrderOut(BaseModel):
     id: int
     user_id: int
     restaurant_id: int
+    restaurant_name: str = ""
     status: str
     total_amount: float
     created_at: datetime

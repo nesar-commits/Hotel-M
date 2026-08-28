@@ -8,13 +8,33 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # ---------- Restaurants ----------
-def list_restaurants(db: Session, city: str | None = None, search: str | None = None):
-    query = db.query(models.Restaurant)
+def _filter_restaurants(query, city: str | None, search: str | None):
     if city:
         query = query.filter(models.Restaurant.city.ilike(f"%{city}%"))
     if search:
         query = query.filter(models.Restaurant.name.ilike(f"%{search}%"))
-    return query.order_by(models.Restaurant.rating.desc()).all()
+    return query
+
+
+def list_restaurants(
+    db: Session,
+    city: str | None = None,
+    search: str | None = None,
+    limit: int = 24,
+    offset: int = 0,
+):
+    query = _filter_restaurants(db.query(models.Restaurant), city, search)
+    return (
+        query.order_by(models.Restaurant.rating.desc(), models.Restaurant.id.asc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+
+def count_restaurants(db: Session, city: str | None = None, search: str | None = None) -> int:
+    query = _filter_restaurants(db.query(models.Restaurant), city, search)
+    return query.count()
 
 
 def get_restaurant(db: Session, restaurant_id: int):
@@ -105,11 +125,11 @@ def get_user_by_email(db: Session, email: str):
 
 
 # ---------- Orders ----------
-def create_order(db: Session, order: schemas.OrderCreate):
-    if not db.query(models.User).filter(models.User.id == order.user_id).first():
-        raise ValueError(f"User {order.user_id} not found")
+def create_order(db: Session, user_id: int, order: schemas.OrderCreate):
     if not db.query(models.Restaurant).filter(models.Restaurant.id == order.restaurant_id).first():
         raise ValueError(f"Restaurant {order.restaurant_id} not found")
+    if not order.items:
+        raise ValueError("Order must contain at least one item")
 
     total = 0.0
     order_items = []
@@ -128,7 +148,7 @@ def create_order(db: Session, order: schemas.OrderCreate):
         )
 
     db_order = models.Order(
-        user_id=order.user_id,
+        user_id=user_id,
         restaurant_id=order.restaurant_id,
         total_amount=total,
         items=order_items,
@@ -139,14 +159,41 @@ def create_order(db: Session, order: schemas.OrderCreate):
     return db_order
 
 
+def _order_query(db: Session):
+    return db.query(models.Order).options(
+        joinedload(models.Order.items).joinedload(models.OrderItem.menu_item),
+        joinedload(models.Order.restaurant),
+    )
+
+
 def list_orders_for_user(db: Session, user_id: int):
     return (
-        db.query(models.Order)
-        .options(joinedload(models.Order.items))
+        _order_query(db)
         .filter(models.Order.user_id == user_id)
         .order_by(models.Order.created_at.desc())
         .all()
     )
+
+
+def list_orders_for_restaurant(db: Session, restaurant_id: int | None = None):
+    query = _order_query(db)
+    if restaurant_id is not None:
+        query = query.filter(models.Order.restaurant_id == restaurant_id)
+    return query.order_by(models.Order.created_at.desc()).all()
+
+
+def get_order(db: Session, order_id: int):
+    return _order_query(db).filter(models.Order.id == order_id).first()
+
+
+def update_order_status(db: Session, order_id: int, new_status: str):
+    order = get_order(db, order_id)
+    if not order:
+        raise ValueError(f"Order {order_id} not found")
+    order.status = new_status
+    db.commit()
+    db.refresh(order)
+    return order
 
 
 def get_order_menu_items_for_user(db: Session, user_id: int) -> list[models.MenuItem]:

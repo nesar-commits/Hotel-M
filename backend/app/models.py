@@ -78,6 +78,7 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(150), nullable=False)
     email: Mapped[str] = mapped_column(String(150), unique=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    is_staff: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     orders: Mapped[list["Order"]] = relationship(back_populates="user")
@@ -99,6 +100,10 @@ class Order(Base):
         back_populates="order", cascade="all, delete-orphan"
     )
 
+    @property
+    def restaurant_name(self) -> str:
+        return self.restaurant.name if self.restaurant else ""
+
 
 class OrderItem(Base):
     __tablename__ = "order_items"
@@ -111,3 +116,7 @@ class OrderItem(Base):
 
     order: Mapped["Order"] = relationship(back_populates="items")
     menu_item: Mapped["MenuItem"] = relationship()
+
+    @property
+    def menu_item_name(self) -> str:
+        return self.menu_item.name if self.menu_item else ""

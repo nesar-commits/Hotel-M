@@ -9,9 +9,20 @@ router = APIRouter(prefix="/restaurants", tags=["restaurants"])
 
 @router.get("", response_model=list[schemas.RestaurantOut])
 def list_restaurants(
+    city: str | None = None,
+    search: str | None = None,
+    limit: int = 24,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+):
+    return crud.list_restaurants(db, city=city, search=search, limit=limit, offset=offset)
+
+
+@router.get("/count")
+def count_restaurants(
     city: str | None = None, search: str | None = None, db: Session = Depends(get_db)
 ):
-    return crud.list_restaurants(db, city=city, search=search)
+    return {"total": crud.count_restaurants(db, city=city, search=search)}
 
 
 @router.post("", response_model=schemas.RestaurantOut, status_code=201)

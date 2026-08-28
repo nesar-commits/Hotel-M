@@ -4,8 +4,11 @@ Run with: python -m app.seed
 """
 
 from app import models
+from app.bulk_restaurants import build_generated_restaurants
 from app.crud import pwd_context
 from app.database import Base, SessionLocal, engine
+
+GENERATED_RESTAURANT_COUNT = 5000
 
 def _img(photo_id: str) -> str:
     return f"https://images.unsplash.com/{photo_id}?w=400"
@@ -45,7 +48,7 @@ RESTAURANTS = [
         "longitude": 72.8295,
         "rating": 4.6,
         "cost_for_two": 900,
-        "image_url": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800",
+        "image_url": "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=800",
         "categories": ["Starters", "Pizza", "Pasta", "Desserts", "Beverages"],
         "items": [
             ("Bruschetta", "Toasted bread with tomato, basil and olive oil", 210, True, "Starters", "italian,bread,tomato", _img("photo-1572695157366-5e585ab2b69f")),
@@ -99,6 +102,14 @@ def run():
                 hashed_password=pwd_context.hash("demo1234"),
             )
         )
+        db.add(
+            models.User(
+                name="Kitchen Staff",
+                email="staff@tastyhub.dev",
+                hashed_password=pwd_context.hash("staff1234"),
+                is_staff=True,
+            )
+        )
         db.flush()
 
         for r in RESTAURANTS:
@@ -143,6 +154,11 @@ def run():
 
         db.commit()
         print("Seeded database with sample restaurants and menu items.")
+
+        generated = build_generated_restaurants(GENERATED_RESTAURANT_COUNT)
+        db.add_all(generated)
+        db.commit()
+        print(f"Generated {len(generated)} additional demo restaurants.")
     finally:
         db.close()
 

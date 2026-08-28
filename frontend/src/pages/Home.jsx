@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { getNearbyRestaurants, getRestaurants } from "../api/client.js";
+import { getNearbyRestaurants, getRestaurantCount, getRestaurants } from "../api/client.js";
 import RestaurantCard from "../components/RestaurantCard.jsx";
 import SearchBar from "../components/SearchBar.jsx";
+
+const PAGE_SIZE = 30;
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
   const city = searchParams.get("city") || "";
   const [restaurants, setRestaurants] = useState([]);
+  const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [nearbyMode, setNearbyMode] = useState(false);
   const [locating, setLocating] = useState(false);
@@ -18,11 +22,14 @@ export default function Home() {
   useEffect(() => {
     if (nearbyMode) return;
     setLoading(true);
-    const params = {};
+    const params = { limit: PAGE_SIZE, offset: 0 };
     if (search) params.search = search;
     if (city) params.city = city;
-    getRestaurants(params)
-      .then(setRestaurants)
+    Promise.all([getRestaurants(params), getRestaurantCount(params)])
+      .then(([list, countRes]) => {
+        setRestaurants(list);
+        setTotal(countRes.total);
+      })
       .catch(() =>
         setError(
           "Could not reach the backend API. Make sure it's running at http://localhost:8000.",
@@ -30,6 +37,17 @@ export default function Home() {
       )
       .finally(() => setLoading(false));
   }, [search, city, nearbyMode]);
+
+  const loadMore = () => {
+    setLoadingMore(true);
+    const params = { limit: PAGE_SIZE, offset: restaurants.length };
+    if (search) params.search = search;
+    if (city) params.city = city;
+    getRestaurants(params)
+      .then((more) => setRestaurants((prev) => [...prev, ...more]))
+      .catch(() => setError("Could not load more restaurants."))
+      .finally(() => setLoadingMore(false));
+  };
 
   const clearCity = () => setSearchParams({});
 
@@ -121,12 +139,29 @@ export default function Home() {
 
       {error && <p className="mb-4 text-sm font-medium text-red-600">{error}</p>}
       {loading && !nearbyMode && <p className="text-sm text-gray-500">Loading restaurants...</p>}
+      {!loading && !nearbyMode && total > 0 && (
+        <p className="mb-3 text-sm text-gray-500">
+          Showing {restaurants.length} of {total} restaurants
+        </p>
+      )}
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {restaurants.map((r) => (
           <RestaurantCard key={r.id} restaurant={r} />
         ))}
       </div>
+
+      {!loading && !nearbyMode && restaurants.length < total && (
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            className="rounded-full bg-white px-6 py-2 text-sm font-bold text-zomato shadow hover:bg-zomato-light disabled:opacity-60"
+          >
+            {loadingMore ? "Loading..." : "Load more"}
+          </button>
+        </div>
+      )}
 
       {!loading && !error && restaurants.length === 0 && (
         <p className="text-sm text-gray-500">
