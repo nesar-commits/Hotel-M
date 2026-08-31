@@ -3,25 +3,39 @@ import { useSearchParams } from "react-router-dom";
 import { getNearbyRestaurants, getRestaurantCount, getRestaurants } from "../api/client.js";
 import RestaurantCard from "../components/RestaurantCard.jsx";
 import SearchBar from "../components/SearchBar.jsx";
+import { useUserLocation } from "../context/UserLocationContext.jsx";
 
 const PAGE_SIZE = 30;
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
   const city = searchParams.get("city") || "";
+  const { location } = useUserLocation();
   const [restaurants, setRestaurants] = useState([]);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
-  const [nearbyMode, setNearbyMode] = useState(false);
-  const [locating, setLocating] = useState(false);
-  const [locationError, setLocationError] = useState(null);
+  const [forceBrowse, setForceBrowse] = useState(false);
+
+  const nearbyMode = !!location && !search && !city && !forceBrowse;
 
   useEffect(() => {
-    if (nearbyMode) return;
+    setError(null);
     setLoading(true);
+
+    if (nearbyMode) {
+      getNearbyRestaurants(location.lat, location.lng)
+        .then((data) => {
+          setRestaurants(data);
+          setTotal(data.length);
+        })
+        .catch(() => setError("Could not fetch nearby restaurants."))
+        .finally(() => setLoading(false));
+      return;
+    }
+
     const params = { limit: PAGE_SIZE, offset: 0 };
     if (search) params.search = search;
     if (city) params.city = city;
@@ -36,7 +50,7 @@ export default function Home() {
         ),
       )
       .finally(() => setLoading(false));
-  }, [search, city, nearbyMode]);
+  }, [search, city, nearbyMode, location?.lat, location?.lng]);
 
   const loadMore = () => {
     setLoadingMore(true);
@@ -51,80 +65,43 @@ export default function Home() {
 
   const clearCity = () => setSearchParams({});
 
-  const useMyLocation = () => {
-    setLocationError(null);
-
-    if (!navigator.geolocation) {
-      setLocationError("Your browser doesn't support location detection.");
-      return;
-    }
-
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        getNearbyRestaurants(coords.latitude, coords.longitude)
-          .then((data) => {
-            setRestaurants(data);
-            setNearbyMode(true);
-            setSearchParams({});
-          })
-          .catch(() => setLocationError("Could not fetch nearby restaurants."))
-          .finally(() => setLocating(false));
-      },
-      (err) => {
-        setLocating(false);
-        if (err.code === err.PERMISSION_DENIED) {
-          setLocationError("Location access was denied. Enable it in your browser to use this.");
-        } else {
-          setLocationError("Could not determine your location. Please try again.");
-        }
-      },
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
-  };
-
-  const exitNearbyMode = () => {
-    setNearbyMode(false);
-    setLocationError(null);
-  };
-
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
       <div className="mb-6 rounded-2xl bg-gradient-to-r from-zomato to-zomato-dark p-8 text-white">
         <h1 className="text-3xl font-extrabold">
           {nearbyMode
-            ? "Restaurants near you"
+            ? `Restaurants near ${location.label}`
             : city
               ? `Restaurants in ${city}`
               : "Order food from your favourite restaurants"}
         </h1>
         <p className="mt-2 text-white/90">Fast delivery. Great taste. Zero fuss.</p>
 
-        {!nearbyMode && (
-          <div className="mt-4 flex max-w-md items-center gap-3">
-            <SearchBar value={search} onChange={setSearch} placeholder="Search restaurants..." />
-          </div>
-        )}
+        <div className="mt-4 flex max-w-md items-center gap-3">
+          <SearchBar value={search} onChange={setSearch} placeholder="Search restaurants..." />
+        </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          {!nearbyMode && (
-            <button
-              onClick={useMyLocation}
-              disabled={locating}
-              className="rounded-full bg-white px-4 py-1.5 text-xs font-bold text-zomato shadow hover:bg-zomato-light disabled:opacity-60"
-            >
-              {locating ? "Locating..." : "📍 Use my location"}
-            </button>
-          )}
           {nearbyMode && (
             <button
-              onClick={exitNearbyMode}
+              onClick={() => setForceBrowse(true)}
               className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white hover:bg-white/30"
             >
-              × Back to browsing
+              Browse all restaurants instead
             </button>
           )}
-          {city && !nearbyMode && (
+          {!nearbyMode && location && (forceBrowse || city) && (
+            <button
+              onClick={() => {
+                setForceBrowse(false);
+                clearCity();
+              }}
+              className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white hover:bg-white/30"
+            >
+              × Back to "{location.label}"
+            </button>
+          )}
+          {city && !nearbyMode && !location && (
             <button
               onClick={clearCity}
               className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white hover:bg-white/30"
@@ -133,12 +110,10 @@ export default function Home() {
             </button>
           )}
         </div>
-
-        {locationError && <p className="mt-3 text-sm font-medium text-yellow-100">{locationError}</p>}
       </div>
 
       {error && <p className="mb-4 text-sm font-medium text-red-600">{error}</p>}
-      {loading && !nearbyMode && <p className="text-sm text-gray-500">Loading restaurants...</p>}
+      {loading && <p className="text-sm text-gray-500">Loading restaurants...</p>}
       {!loading && !nearbyMode && total > 0 && (
         <p className="mb-3 text-sm text-gray-500">
           Showing {restaurants.length} of {total} restaurants

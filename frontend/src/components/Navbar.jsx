@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useCart } from "../context/CartContext.jsx";
+import LocationBar from "./LocationBar.jsx";
 import Logo from "./Logo.jsx";
 
 export default function Navbar({ onCartClick }) {
@@ -16,9 +17,14 @@ export default function Navbar({ onCartClick }) {
   return (
     <header className="sticky top-0 z-30 bg-white shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link to="/">
-          <Logo />
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link to="/">
+            <Logo />
+          </Link>
+          <div className="hidden sm:block">
+            <LocationBar />
+          </div>
+        </div>
         <div className="flex items-center gap-3">
           {user?.is_staff && (
             <Link
@@ -67,6 +73,9 @@ export default function Navbar({ onCartClick }) {
             </Link>
           )}
         </div>
+      </div>
+      <div className="border-t border-gray-100 px-4 py-2 sm:hidden">
+        <LocationBar />
       </div>
     </header>
   );
