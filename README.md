@@ -11,11 +11,14 @@ pipeline — plus content-based recommendations ("Popular Dishes",
 ```
 backend/    FastAPI + PostgreSQL + JWT auth + scikit-learn recommendation engine
 frontend/   React + Vite + Tailwind (Zomato-style UI)
+ios/        Swift + SwiftUI native app, consumes the same API
 ```
 
-Native **Android (Kotlin)** and **iOS (Swift)** apps, plus a deeper AI/ML/DL
-layer, are still future phases — this machine has no Android SDK and no full
-Xcode/simulator, so that work isn't buildable or testable here.
+The iOS app (see `ios/README.md`) covers the core customer flow — browse/search
+restaurants, menu, cart, auth, order tracking — but hasn't been built or run,
+since this machine has only the Xcode Command Line Tools (no full Xcode/iOS
+SDK). A native **Android (Kotlin)** app, plus a deeper AI/ML/DL layer, are
+still future phases — this machine also has no Android SDK.
 
 ## Backend setup
 
@@ -103,6 +106,7 @@ similarity for:
 ## Roadmap
 
 - [ ] Android app (Kotlin, Jetpack Compose) consuming the same API
-- [ ] iOS app (Swift, SwiftUI) consuming the same API
+- [x] iOS app (Swift, SwiftUI) consuming the same API — core customer flow
+      scaffolded, not yet build-verified (`ios/`)
 - [ ] Deeper ML: collaborative filtering, image-based dish tagging
 - [ ] Payment integration (currently orders are placed with no payment step)
