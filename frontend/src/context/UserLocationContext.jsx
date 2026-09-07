@@ -61,7 +61,10 @@ export function UserLocationProvider({ children }) {
           if (!silent) setStatus(err.code === err.PERMISSION_DENIED ? "denied" : "error");
           reject(err);
         },
-        { enableHighAccuracy: true, timeout: 10000 },
+        // Coarse (Wi-Fi/IP-based) location is all a city-level "near you" list needs, and it's far
+        // more reliable than GPS-grade accuracy on a laptop with no GPS chip — enableHighAccuracy
+        // routinely fails with POSITION_UNAVAILABLE on desktop before the timeout even hits.
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
       );
     });
   };

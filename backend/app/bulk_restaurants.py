@@ -94,8 +94,6 @@ CUISINE_PROFILES = [
         "label": "American, Fast Food",
         "categories": ["Burgers", "Sides", "Beverages"],
         "dishes": [
-            ("Classic Cheeseburger", "Juicy beef patty with cheddar, lettuce and tomato", 220, False, "Burgers", "burger,fastfood,beef", "photo-1568901346375-23c9450c58cd"),
-            ("Double Beef Burger", "Two beef patties stacked with cheese and pickles", 280, False, "Burgers", "burger,fastfood,beef", "photo-1550547660-d9450f859349"),
             ("Crispy Fried Chicken", "Buttermilk-fried chicken with a crunchy coating", 260, False, "Burgers", "fried,chicken,fastfood", "photo-1553163147-622ab57be1c7"),
             ("Buffalo Wings", "Spicy buffalo wings served with ranch dip", 240, False, "Sides", "fried,chicken,spicy", "photo-1567620832903-9fc6debc209f"),
             ("Loaded Fries", "Crispy fries loaded with cheese and toppings", 160, True, "Sides", "fried,snack,cheese", "photo-1573225342350-16731dd9bf3d"),
